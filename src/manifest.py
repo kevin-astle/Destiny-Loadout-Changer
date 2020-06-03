@@ -1,7 +1,9 @@
 """
-This code taken almost verbatim from http://destinydevs.github.io/BungieNetPlatform/docs/Manifest
+Portions of this code taken from http://destinydevs.github.io/BungieNetPlatform/docs/Manifest 
+and modified
 """
 
+from builtins import property
 import json
 import os
 import pickle
@@ -9,6 +11,35 @@ import sqlite3
 import zipfile
 
 import requests
+
+
+class Manifest:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self._data = None
+
+    def get_manifest_data(self, api_key):
+        # check if pickle file exists, if not create one.
+        if os.path.isfile('manifest.pickle'):
+            all_data = pickle.load(open('manifest.pickle', 'rb'))
+        else:
+            get_manifest(api_key)
+            all_data = build_dict({
+                'DestinyInventoryItemDefinition': 'hash'
+            })
+            with open('manifest.pickle', 'wb') as f:
+                pickle.dump(all_data, f)
+        return all_data
+
+    @property
+    def data(self):
+        if self._data is None:
+            self._data = self.get_manifest_data()
+        return self._data
+
+    @property
+    def item_data(self):
+        return self.data['DestinyInventoryItemDefinition']
 
 
 def get_manifest(api_key):
@@ -34,11 +65,6 @@ def get_manifest(api_key):
     os.rename(name[0], 'manifest.content')
 
 
-hashes = {
-    'DestinyInventoryItemDefinition': 'hash'
-}
-
-
 def build_dict(hash_dict):
     # connect to the manifest
     con = sqlite3.connect('manifest.content')
@@ -60,27 +86,11 @@ def build_dict(hash_dict):
         # create a dictionary with the hashes as keys
         # and the jsons as values
         item_dict = {}
-        hash = hash_dict[table_name]
         for item in item_jsons:
-            if hash in item:
-                item_dict[item[hash]] = item
+            item_dict[item[hash_dict[table_name]]] = item
 
         # add that dictionary to our all_data using the name of the table
         # as a key.
         all_data[table_name] = item_dict
-
-    return all_data
-
-
-def get_manifest_data(api_key):
-    # check if pickle exists, if not create one.
-    if not os.path.isfile('manifest.pickle'):
-        get_manifest(api_key)
-        all_data = build_dict(hashes)
-        with open('manifest.pickle', 'wb') as data:
-            pickle.dump(all_data, data)
-
-    with open('manifest.pickle', 'rb') as data:
-        all_data = pickle.load(data)
 
     return all_data

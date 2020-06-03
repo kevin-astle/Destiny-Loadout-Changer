@@ -1,15 +1,19 @@
-from datetime import datetime
 import time
 
 import requests
 
-from src.manifest import get_manifest_data
+from src.manifest import Manifest
 
 
-BASE_URL = 'https://www.bungie.net/Platform'
+BASE_URL = 'https://www.bungie.net/Platform'  # Base API url
 
 
 class API:
+    """
+    Handles all the authentication details and provides methods for making api calls to arbitrary
+    Bungie endpoints
+    """
+
     def __init__(self, api_key, client_id, client_secret, oauth_code, bungie_membership_type):
         self.api_key = api_key
         self.client_id = client_id
@@ -19,8 +23,9 @@ class API:
         self._membership_type = None
         self._access_token = None
         self._membership_id = None
-        self._manifest_data = None
         self.expiration_date = None
+
+        self.manifest = Manifest(self.api_key)
 
     @property
     def access_token(self):
@@ -45,12 +50,6 @@ class API:
         if self._membership_id is None:
             self.get_token()
         return self._membership_id
-
-    @property
-    def manifest_data(self):
-        if self._manifest_data is None:
-            self._manifest_data = get_manifest_data(self.api_key)
-        return self._manifest_data
 
     def get_token(self):
         response = requests.post('https://www.bungie.net/Platform/App/OAuth/Token', data={
@@ -93,31 +92,12 @@ class API:
         assert output['ErrorStatus'] == 'Success'
         return output
 
-    def get_inventory(self):
-        return self.make_get_call(
-            '/Destiny2/{}/Profile/{}'.format(self.membership_type, self.membership_id), {'components': '102'})['Response']['profileInventory']['data']['items']
-
-    def get_characters(self):
-        return self.make_get_call(
-            '/Destiny2/{}/Profile/{}'.format(self.membership_type, self.membership_id), {'components': '200'})['Response']['characters']['data']
-
-    def get_inventory_weapons(self):
-        weapons = [
-            x for x in self.get_inventory()
-            if self.manifest_data['DestinyInventoryItemDefinition'][x['itemHash']]['itemType'] == 3]
-        for x in weapons:
-            print(self.manifest_data['DestinyInventoryItemDefinition']
-                  [x['itemHash']]['displayProperties']['name'])
-        return weapons
-
-    def get_inventory_armor(self):
-        return [
-            x for x in self.get_inventory()
-            if self.manifest_data['DestinyInventoryItemDefinition'][x['itemHash']]['itemType'] == 2]
-
-    def get_active_character(self):
-        characters = self.get_characters()
-
-        # Figure out which has the most recent playtime
-        current_datetime = datetime.utcnow()
-        # for character_id, data in characters.items():
+    def make_post_call(self, endpoint, data=None):
+        response = requests.post(BASE_URL + endpoint,
+                                 json=data,
+                                 headers={'X-API-Key': self.api_key,
+                                          'Authorization': 'Bearer {}'.format(self.access_token)})
+        response.raise_for_status()
+        output = response.json()
+        assert output['ErrorStatus'] == 'Success'
+        return output
