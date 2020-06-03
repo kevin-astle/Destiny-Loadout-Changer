@@ -27,6 +27,8 @@ class API:
 
         self.manifest = Manifest(self.api_key)
 
+        self.last_api_call_time = 0
+
     @property
     def access_token(self):
         if self._access_token is None:
@@ -82,7 +84,9 @@ class API:
         self.expiration_date = time.time() + output['expires_in']
         self._membership_id = output['membership_id']
 
-    def make_get_call(self, endpoint, params=None):
+    def make_get_call(self, endpoint, params=None, rate_limit=0):
+        if time.time() - self.last_api_call_time < rate_limit:
+            time.sleep(rate_limit - (time.time() - self.last_api_call_time))
         response = requests.get(BASE_URL + endpoint,
                                 params=params,
                                 headers={'X-API-Key': self.api_key,
@@ -90,9 +94,12 @@ class API:
         response.raise_for_status()
         output = response.json()
         assert output['ErrorStatus'] == 'Success'
+        self.last_api_call_time = time.time()
         return output
 
-    def make_post_call(self, endpoint, data=None):
+    def make_post_call(self, endpoint, data=None, rate_limit=0):
+        if time.time() - self.last_api_call_time < rate_limit:
+            time.sleep(rate_limit - (time.time() - self.last_api_call_time))
         response = requests.post(BASE_URL + endpoint,
                                  json=data,
                                  headers={'X-API-Key': self.api_key,

@@ -1,7 +1,7 @@
 .project
 .pydevproject
 config.json
-.pyc
+*.pyc
 *.pickle
 manifest.content
 manifest.zip

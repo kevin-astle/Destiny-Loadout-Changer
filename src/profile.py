@@ -9,6 +9,7 @@ class Profile:
     def __init__(self, api):
         self.api = api
         self._active_character = None
+        self.last_equip_time = 0
 
     @property
     def active_character(self):
@@ -19,7 +20,8 @@ class Profile:
             self._active_character = self.get_most_recent_character()
         return self._active_character
 
-    def get_characters(self):
+    @property
+    def characters(self):
         """
         Get all characters in the account
         """
@@ -27,52 +29,72 @@ class Profile:
             '/Destiny2/{}/Profile/{}'.format(self.api.membership_type, self.api.membership_id),
             {'components': '200'}
         )['Response']['characters']['data']
-        return [Character(x) for x in characters]
+        return [Character(self.api, x, self) for x in characters.values()]
 
     def get_most_recent_character(self):
         """
         Returns the character that was played most recently. If currently playing, then the active 
         character will be returned
         """
-        characters = self.get_characters()
-
         most_recent_character = None
         most_recent_playtime = None
         current_datetime = datetime.utcnow()
 
         # Figure out which character has the most recent playtime
-        for data in characters.values():
-            # Convert most recent playtime to a datetime for comparison
-            last_played = datetime.strptime(data['dateLastPlayed'], '%Y-%m-%dT%H:%M:%SZ')
+        for character in self.characters:
 
             if most_recent_character is None:
-                most_recent_character = data
-                most_recent_playtime = last_played
+                most_recent_character = character
+                most_recent_playtime = character.last_played
             else:
                 # If the character in question has more recent playtime than the other characters
                 # already inspected, then set as the new most recent character
-                if (current_datetime - last_played).total_seconds() < \
+                if (current_datetime - character.last_played).total_seconds() < \
                         (current_datetime - most_recent_playtime).total_seconds():
-                    most_recent_character = data
-                    most_recent_playtime = last_played
+                    most_recent_character = character
+                    most_recent_playtime = character.last_played
 
         return most_recent_character
 
-    def get_inventory(self):
+    def get_vault_weapons(self):
         """
-        Get profile-wide inventory, including weapons, armor, consumables, etc., both in the 
-        character inventories as well as in the vault
+        Get all weapons in the vault
         """
-        return self.api.make_get_call(
+        items = self.api.make_get_call(
             '/Destiny2/{}/Profile/{}'.format(self.api.membership_type, self.api.membership_id),
             {'components': '102'}
         )['Response']['profileInventory']['data']['items']
+        return [
+            Weapon(x, self.api.manifest) for x in items
+            if self.api.manifest.item_data[x['itemHash']]['itemType'] == 3
+        ]
 
-    def get_inventory_weapons(self):
+    def get_all_weapons(self):
         """
-        Get all weapons in character inventories and in the vault
+        Get all weapons, across all characters and the vault. Does not include postmaster weapons 
+        or currently equipped weapons
         """
-        weapons = [
-            x for x in self.get_inventory()
-            if self.api.manifest.item_data[x['itemHash']]['itemType'] == 3]
-        return [Weapon(x) for x in weapons]  # Convert to a list of Weapon class instances
+        all_weapons = self.get_vault_weapons()
+
+        for character in self.characters:
+            all_weapons += character.get_character_weapons()['unequipped']
+
+        return all_weapons
+
+    def get_weapon_owner(self, weapon):
+        """
+        Return the character currently in possession of a specified weapon. If no character has it,
+        then return None
+        """
+        if weapon in self.get_vault_weapons():
+            return None
+
+        for character in self.characters:
+            for char_weapon in character.equipped_weapons:
+                if char_weapon == weapon:
+                    return character
+            for char_weapon in character.unequipped_weapons:
+                if char_weapon == weapon:
+                    return character
+
+        return None  # No character has this weapon

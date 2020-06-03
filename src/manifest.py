@@ -34,7 +34,7 @@ class Manifest:
     @property
     def data(self):
         if self._data is None:
-            self._data = self.get_manifest_data()
+            self._data = self.get_manifest_data(self.api_key)
         return self._data
 
     @property
