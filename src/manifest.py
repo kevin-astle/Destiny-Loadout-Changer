@@ -50,14 +50,14 @@ def get_manifest(api_key):
     manifest = r.json()
     mani_url = 'http://www.bungie.net' + manifest['Response']['mobileWorldContentPaths']['en']
 
-    # Download the file, write it to 'MANZIP'
+    # Download the file, write it to 'manifest.zip'
     r = requests.get(mani_url)
-    with open("MANZIP", "wb") as zip:
+    with open("manifest.zip", "wb") as zip:
         zip.write(r.content)
 
     # Extract the file contents, and rename the extracted file
-    # to 'Manifest.content'
-    with zipfile.ZipFile('MANZIP') as zip:
+    # to 'manifest.content'
+    with zipfile.ZipFile('manifest.zip') as zip:
         name = zip.namelist()
         zip.extractall()
     if os.path.exists('manifest.content'):
