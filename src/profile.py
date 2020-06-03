@@ -62,7 +62,8 @@ class Profile:
         """
         items = self.api.make_get_call(
             '/Destiny2/{}/Profile/{}'.format(self.api.membership_type, self.api.membership_id),
-            {'components': '102'}
+            {'components': '102'},
+            rate_limit=3
         )['Response']['profileInventory']['data']['items']
         return [
             Weapon(x, self.api.manifest) for x in items
@@ -77,7 +78,8 @@ class Profile:
         all_weapons = self.get_vault_weapons()
 
         for character in self.characters:
-            all_weapons += character.get_character_weapons()['unequipped']
+            unequipped = character.unequipped_weapons
+            all_weapons += unequipped
 
         return all_weapons
 

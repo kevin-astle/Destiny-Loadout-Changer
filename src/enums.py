@@ -13,6 +13,18 @@ class WeaponType:
             953998645: WeaponType.POWER
         }.get(bucket_type_hash, WeaponType.UNKNOWN)
 
+    @staticmethod
+    def get_enum_from_string(sub_type_string):
+        # Remove all nonletters, and convert to lowercase
+        sub_type_string = ''.join(ch for ch in sub_type_string if ch.isalpha()).lower()
+
+        return {
+            'kinetic': WeaponType.KINETIC,
+            'energy': WeaponType.ENERGY,
+            'power': WeaponType.POWER,
+            'heavy': WeaponType.POWER
+        }.get(sub_type_string, WeaponType.UNKNOWN)
+
 
 class TierType:
     BASIC = 2
@@ -41,7 +53,8 @@ class WeaponSubType:
     BOW = 31
     UNKNOWN = 0
 
-    def get_string_representation(self, sub_type):
+    @staticmethod
+    def get_string_representation(sub_type):
         return {
             WeaponSubType.AUTO_RIFLE: 'Auto Rifle',
             WeaponSubType.SHOTGUN: 'Shotgun',
@@ -61,25 +74,33 @@ class WeaponSubType:
             WeaponSubType.BOW: 'Bow'
         }.get(sub_type, 'Unknown')
 
-    def get_enum_from_string(self, sub_type_string):
+    @staticmethod
+    def get_enum_from_string(sub_type_string):
         # Remove all nonletters, and convert to lowercase
-        sub_type_string = ''.join(ch for ch in sub_type_string if ch.isalpha()).lowercase()
+        sub_type_string = ''.join(ch for ch in sub_type_string if ch.isalpha()).lower()
 
         return {
             'autorifle': WeaponSubType.AUTO_RIFLE,
+            'auto': WeaponSubType.AUTO_RIFLE,
             'shotgun': WeaponSubType.SHOTGUN,
             'machinegun': WeaponSubType.MACHINE_GUN,
             'handcannon': WeaponSubType.HAND_CANNON,
             'rocketlauncher': WeaponSubType.ROCKET_LAUNCHER,
             'fusionrifle': WeaponSubType.FUSION_RIFLE,
+            'fusion': WeaponSubType.FUSION_RIFLE,
             'sniperrifle': WeaponSubType.SNIPER_RIFLE,
+            'sniper': WeaponSubType.SNIPER_RIFLE,
             'pulserifle': WeaponSubType.PULSE_RIFLE,
+            'pulse': WeaponSubType.PULSE_RIFLE,
             'scoutrifle': WeaponSubType.SCOUT_RIFLE,
+            'scout': WeaponSubType.SCOUT_RIFLE,
             'sidearm': WeaponSubType.SIDEARM,
             'sword': WeaponSubType.SWORD,
             'linearfusionrifle': WeaponSubType.LINEAR_FUSION_RIFLE,
+            'linearfusion': WeaponSubType.LINEAR_FUSION_RIFLE,
             'grenadelauncher': WeaponSubType.GRENADE_LAUNCHER,
             'submachinegun': WeaponSubType.SUBMACHINE_GUN,
+            'smg': WeaponSubType.SUBMACHINE_GUN,
             'tracerifle': WeaponSubType.TRACE_RIFLE,
             'bow': WeaponSubType.BOW
         }.get(sub_type_string, WeaponSubType.UNKNOWN)

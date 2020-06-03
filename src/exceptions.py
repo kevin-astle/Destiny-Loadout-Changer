@@ -1,6 +1,14 @@
-class Exception:
+class Error(Exception):
     pass
 
 
-class NoAvailableWeapons(Exception):
+class NoAvailableWeaponsError(Error):
+    pass
+
+
+class InvalidSelectionError(Error):
+    pass
+
+
+class TransferError(Error):
     pass

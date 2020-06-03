@@ -27,4 +27,4 @@ if __name__ == '__main__':
     application.wait_for_oauth_approval()
 
     while True:
-        application.profile.active_character.equip_random_weapon(weapon_sub_type=WeaponSubType.BOW)
+        time.sleep(1)
