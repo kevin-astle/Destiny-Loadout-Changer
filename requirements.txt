@@ -1,0 +1,7 @@
+flask
+twitchio
+cryptography
+pickle
+sqlite3
+zipfile
+webbrowser
