@@ -70,13 +70,19 @@ async def command_help(ctx):
     like "!help equip" to get more specific help
     """
     await rate_limited_send(ctx, 'Available commands:')
-    await rate_limited_send(ctx, '!equip <weapon name>: Equip a weapon by name. Use full or '
-                                 'partial names (ex: "!equip recluse" or "!equip ace")')
-    await rate_limited_send(ctx, '!random <slot> <type>: Equip a random weapon with optionally '
-                                 'specified slot and type (ex: "!random shotgun" or "!random '
-                                 'kinetic pulse")')
+    await rate_limited_send(ctx, '!equip <weapon name> <slot> <type>: Equip a weapon by name, or '
+                                 'equip a random weapon with optional type and subtype. Examples: '
+                                 '"!equip jade rabbit", "!equip steelfeather", "!equip energy", '
+                                 '"!equip kinetic pulse". "!equip" by itself equips a completely '
+                                 'random weapon in a random slot.')
+    await rate_limited_send(ctx, '!search <weapon name> <slot> <type>: Search for and display '
+                                 'all weapons matching the given criteria. Format is the same as '
+                                 'for !equip. If the output is >500 characters, it will be '
+                                 'truncated.')
     await rate_limited_send(ctx, 'NOTE: Weapons cannot be equipped mid-activity, but they will be '
-                                 'sent to the player\'s inventory')
+                                 'sent to the player\'s inventory.')
+    await rate_limited_send(ctx, 'NOTE 2: Only weapons in player inventory and vault can be '
+                                 'equipped. Pulling from collections is not supported.')
 
 
 @application.bot.command(name='equip')

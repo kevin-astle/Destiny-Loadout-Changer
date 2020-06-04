@@ -47,8 +47,18 @@ The following commands are available to use:
 ### !help
 A short description of the available commands.
 
-### !equip
-Equip a specific weapon by name. Partial matches are accepted. If multiple matches are found, a random one will be selected and equipped.
+### !equip \<name\> \<slot\> \<type\>
+Equip a weapon, either by name or by slot and/or type.
+
+When matching by name, partial matches are accepted. If multiple matches are found, a random one will be selected and equipped.
+
+When matching by slot/type, you may specify either the slot, the type, or neither. If neither are specified, then a random weapon will be equipped in a random slot. 
+
+The bot inspects the command and tries to determine if it is a request to equip by name, or by weapon slot/type.
+
+Caveats when equipping by slot/type:
+* If weapon slot is not specified, and an exotic weapon is equipped, then exotic weapons will be ignored when selecting.
+* If weapon slot is specified, but an exotic weapon is equipped in one of the other two slots, then exotic weapons will be ignored when selecting.
 
 #### Example usage
 ``!equip the jade rabbit``: Will equip "The Jade Rabbit", because this is an exact match.
@@ -59,21 +69,14 @@ Equip a specific weapon by name. Partial matches are accepted. If multiple match
 
 ``!equip a``: Will equip a random weapon that contains the letter "A" anywhere in the name.
 
-### !random \<slot\> \<type\>
-Equip a random weapon, with optionally specified weapon slot and type. Slot and type and not case-sensitive.
+``!equip``: Equips a random weapon of any type in any slot.
 
-Caveats:
-* If weapon slot is not specified, and an exotic weapon is equipped, then exotic weapons will be ignored when selecting.
-* If weapon slot is specified, but an exotic weapon is equipped in one of the other two slots, then exotic weapons will be ignored when selecting.
+``!equip energy``: Equips a random weapon in the energy slot.
 
-#### Example usage
-``!random``: Equips a random weapon of any type in any slot.
+``!equip bow``: Equips a random bow in any slot.
 
-``!random energy``: Equips a random weapon in the energy slot.
+``!equip kinetic pulse``: Equips a random kinetic pulse rifle.
 
-``!random bow``: Equips a random bow in any slot.
-
-``!random kinetic pulse``: Equips a random kinetic pulse rifle.
 
 Valid values for the slot:
 * kinetic
