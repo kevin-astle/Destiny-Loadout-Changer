@@ -114,7 +114,7 @@ Output from ``!search tool``:
 
     Weapons with names matching "tool" (2 matches): CALUS Mini-Tool x9, MIDA Multi-Tool
 
-Output from ``!search kinetic``:
+Output from ``!search kinetic`` (note the truncation):
 
     Weapons of type Kinetic (55 matches): Atalanta-D XG1992, Austringer, Baligant XU7743, Better Devils, Bite of the Fox, Blast Furnace, BrayTech Werewolf, Bygones x2, Cold Front x2, Dire Promise, Dust Rock Blues, Escape Velocity, Ether Doctor, Exit Strategy, Foregone Conclusion, Ghost Primus, Go Figure x2, Halfdan-D, Hawthorne's Field-Forged Shotgun x4, Horror Story, Imperative, Imperial Decree x2, Khvostov 7G-02, Lonesome, Long Shadow x2, MIDA Multi-Tool, Nameless Midnight x2, Night Watch, Nigh...
 
