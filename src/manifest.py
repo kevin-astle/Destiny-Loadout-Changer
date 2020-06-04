@@ -1,6 +1,6 @@
 """
-Portions of this code taken from http://destinydevs.github.io/BungieNetPlatform/docs/Manifest 
-and modified
+This module mostly based on the code found here:
+http://destinydevs.github.io/BungieNetPlatform/docs/Manifest#/Python-v3X
 """
 
 from builtins import property
@@ -17,80 +17,89 @@ class Manifest:
     def __init__(self, api_key):
         self.api_key = api_key
         self._data = None
+        self._manifest_info = None
 
-    def get_manifest_data(self, api_key):
-        # check if pickle file exists, if not create one.
-        if os.path.isfile('manifest.pickle'):
-            all_data = pickle.load(open('manifest.pickle', 'rb'))
-        else:
-            get_manifest(api_key)
-            all_data = build_dict({
-                'DestinyInventoryItemDefinition': 'hash'
-            })
-            with open('manifest.pickle', 'wb') as f:
-                pickle.dump(all_data, f)
-        return all_data
+        # For now, only one table is needed by the bot. If more data is needed later, then
+        # more tables can be added to this dictionary
+        self.required_db_info = {
+            'DestinyInventoryItemDefinition': 'hash'
+        }
 
     @property
     def data(self):
         if self._data is None:
-            self._data = self.get_manifest_data(self.api_key)
+            # Load saved manifest data, and check if it is out of date. If so, discard it
+            if os.path.isfile('manifest.data'):
+                self._data = pickle.load(open('manifest.data', 'rb'))
+                if self._data.get('version') != self.manifest_version:
+                    self._data = None
+
+            # If, after checking for saved manifest data, we still need to acquire the manifest data
+            if self._data is None:
+                # Download and parse manifest data, and save to a file
+                self._data = self.get_manifest()
+                self._data['version'] = self.manifest_version  # Include version info before saving
+                with open('manifest.data', 'wb') as f:
+                    pickle.dump(self._data, f)
         return self._data
 
     @property
     def item_data(self):
         return self.data['DestinyInventoryItemDefinition']
 
+    @property
+    def manifest_info(self):
+        if self._manifest_info is None:
+            response = requests.get(
+                'http://www.bungie.net/Platform/Destiny2/Manifest',
+                headers={'X-API-Key': self.api_key})
+            response.raise_for_status()
+            self._manifest_info = response.json()['Response']
+        return self._manifest_info
 
-def get_manifest(api_key):
-    manifest_url = 'http://www.bungie.net/Platform/Destiny2/Manifest/'
+    @property
+    def manifest_version(self):
+        return self.manifest_info['version']
 
-    # get the manifest location from the json
-    r = requests.get(manifest_url, headers={'X-API-Key': api_key})
-    manifest = r.json()
-    mani_url = 'http://www.bungie.net' + manifest['Response']['mobileWorldContentPaths']['en']
+    @property
+    def manifest_db_url(self):
+        return 'http://www.bungie.net' + self.manifest_info['mobileWorldContentPaths']['en']
 
-    # Download the file, write it to 'manifest.zip'
-    r = requests.get(mani_url)
-    with open("manifest.zip", "wb") as zip:
-        zip.write(r.content)
+    def get_manifest(self):
+        # Download the sqlite db zip file, write it to 'manifest.zip'
+        r = requests.get(self.manifest_db_url)
+        with open("manifest.zip", "wb") as zip_file:
+            zip_file.write(r.content)
 
-    # Extract the file contents, and rename the extracted file
-    # to 'manifest.content'
-    with zipfile.ZipFile('manifest.zip') as zip:
-        name = zip.namelist()
-        zip.extractall()
-    if os.path.exists('manifest.content'):
-        os.remove('manifest.content')
-    os.rename(name[0], 'manifest.content')
+        # Extract the zip file
+        with zipfile.ZipFile('manifest.zip') as zip_file:
+            name = zip_file.namelist()
+            if os.path.exists(name[0]):
+                os.remove(name[0])
+            zip_file.extractall()
 
+        connection = sqlite3.connect(name[0])
+        cursor = connection.cursor()
 
-def build_dict(hash_dict):
-    # connect to the manifest
-    con = sqlite3.connect('manifest.content')
-    # create a cursor object
-    cur = con.cursor()
+        all_data = {}
+        # for every table that data is to be extracted from
+        for table_name, hash_value in self.required_db_info.items():
+            # Get all json strings from the table
+            cursor.execute('SELECT json from ' + table_name)
+            rows = cursor.fetchall()
 
-    all_data = {}
-    # for every table name in the dictionary
-    for table_name in hash_dict.keys():
-        # get a list of all the jsons from the table
-        cur.execute('SELECT json from ' + table_name)
+            # Deserialize json for each row, and convert to a dictionary, where the keys are the
+            # hashes specified in hash_dict and the values are the dictionaries just loaded
+            table_data = {}
+            for row in rows:
+                row_data = json.loads(row[0])  # db rows are returned as tuples, hence row[0]
+                table_data[row_data[hash_value]] = row_data
 
-        # this returns a list of tuples: the first item in each tuple is our json
-        items = cur.fetchall()
+            all_data[table_name] = table_data
 
-        # create a list of jsons
-        item_jsons = [json.loads(item[0]) for item in items]
+        # Clean up
+        connection.close()
+        os.remove('manifest.zip')
+        os.remove(name[0])
 
-        # create a dictionary with the hashes as keys
-        # and the jsons as values
-        item_dict = {}
-        for item in item_jsons:
-            item_dict[item[hash_dict[table_name]]] = item
-
-        # add that dictionary to our all_data using the name of the table
-        # as a key.
-        all_data[table_name] = item_dict
-
-    return all_data
+        return all_data

@@ -67,8 +67,8 @@ class API:
         self.expiration_date = time.time() + output['expires_in']
 
         # Get platform membership id
-        output = self.make_get_call(
-            '/User/GetBungieAccount/{}/{}'.format(output['membership_id'], self.bungie_membership_type))
+        output = self.make_get_call('/User/GetBungieAccount/{}/{}'.format(
+            output['membership_id'], self.bungie_membership_type))
         self._membership_id = output['Response']['destinyMemberships'][0]['membershipId']
         self._membership_type = output['Response']['destinyMemberships'][0]['membershipType']
 
@@ -84,9 +84,7 @@ class API:
         self.expiration_date = time.time() + output['expires_in']
         self._membership_id = output['membership_id']
 
-    def make_get_call(self, endpoint, params=None, rate_limit=0):
-        if time.time() - self.last_api_call_time < rate_limit:
-            time.sleep(rate_limit - (time.time() - self.last_api_call_time))
+    def make_get_call(self, endpoint, params=None):
         response = requests.get(BASE_URL + endpoint,
                                 params=params,
                                 headers={'X-API-Key': self.api_key,
@@ -97,9 +95,7 @@ class API:
         self.last_api_call_time = time.time()
         return output
 
-    def make_post_call(self, endpoint, data=None, rate_limit=0):
-        if time.time() - self.last_api_call_time < rate_limit:
-            time.sleep(rate_limit - (time.time() - self.last_api_call_time))
+    def make_post_call(self, endpoint, data=None):
         response = requests.post(BASE_URL + endpoint,
                                  json=data,
                                  headers={'X-API-Key': self.api_key,

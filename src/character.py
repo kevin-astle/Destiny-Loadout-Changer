@@ -5,7 +5,7 @@ import time
 import requests.exceptions
 
 from src.enums import WEAPON_BUCKET_HASHES, WeaponSubType
-from src.exceptions import NoAvailableWeaponsError, InvalidSelectionError, TransferError
+from src.exceptions import NoAvailableWeaponsError, InvalidSelectionError, TransferOrEquipError
 from src.item import Weapon
 
 
@@ -96,53 +96,62 @@ class Character:
         """
         Equip a weapon that is currently owned by the character
         """
-        return self.api.make_post_call(
+        response = self.api.make_post_call(
             '/Destiny2/Actions/Items/EquipItem',
             {
                 'itemId': weapon.item_id,
                 'characterId': self.character_id,
                 'membershipType': self.membership_type
             }
-        )['Response']
+        )
+        if response['ErrorStatus'] != 'Success':
+            raise TransferOrEquipError('Unable to equip item. Error message: {}'.format(
+                response['Message']))
 
-    def equip_weapon(self, weapon, rate_limit=0):
+    def equip_weapon(self, weapon, retries=3):
         """
         Attempt to equip the specified weapon on this character, transferring as necessary
         """
-        try:
-            if time.time() - self.profile.last_equip_time < rate_limit:
-                time.sleep(rate_limit - (time.time() - self.profile.last_equip_time))
-            # Determine which character has the item, or if it is in the vault
-            owner = self.profile.get_weapon_owner(weapon)
+        while True:
+            try:
+                # Determine which character has the item, or if it is in the vault
+                owner = self.profile.get_weapon_owner(weapon)
 
-            # If item is not owned by current character
-            if owner != self:
-                # If owned by other character, transfer to vault
-                if owner is not None:
-                    owner.transfer_to_vault(weapon)
+                # If item is not owned by current character
+                if owner != self:
+                    # If owned by other character, transfer to vault
+                    if owner is not None:
+                        owner.transfer_to_vault(weapon)
 
-                # Get the number of weapons in the same slot as the requested weapon
-                same_slot_weapons = [x for x in self.unequipped_weapons if x.type == weapon.type]
+                    # Get the number of weapons in the same slot as the requested weapon
+                    same_slot_weapons = [
+                        x for x in self.unequipped_weapons if x.type == weapon.type]
 
-                # If necessary, move last weapon in that slot to the vault to make room
-                if len(same_slot_weapons) == 9:
-                    self.transfer_to_vault(same_slot_weapons[-1])
+                    # If necessary, move last weapon in that slot to the vault to make room
+                    if len(same_slot_weapons) == 9:
+                        self.transfer_to_vault(same_slot_weapons[-1])
 
-                # Transfer from vault to current character
-                self.transfer_to_character(weapon)
+                    # Transfer from vault to current character
+                    self.transfer_to_character(weapon)
 
-            # Finally, equip the weapon
-            response = self.equip_owned_weapon(weapon)
+                # Finally, equip the weapon
+                self.equip_owned_weapon(weapon)
 
-            self.profile.last_equip_time = time.time()
-        except requests.exceptions.HTTPError as e:
-            response_json = e.response.json()
-            if response_json['ErrorCode'] == 1623:  # Item requested was not found
-                raise TransferError('Unable to transfer or equip item. Please try again')
+                self.profile.last_equip_time = time.time()
+            except requests.exceptions.HTTPError as e:
+                if retries <= 0:
+                    response_json = e.response.json()
+                    if response_json['ErrorCode'] == 1623:  # Item requested was not found
+                        raise TransferOrEquipError(
+                            'Unable to transfer or equip item. Please try again')
+                    else:
+                        raise TransferOrEquipError(response_json['Message'])
+                retries -= 1
+                time.sleep(3)
             else:
-                raise TransferError(response_json['Message'])
+                break
 
-    def equip_random_weapon(self, weapon_type=None, weapon_sub_type=None):
+    def select_random_weapon(self, weapon_type=None, weapon_sub_type=None):
         if weapon_sub_type == WeaponSubType.TRACE_RIFLE:
             raise InvalidSelectionError('Random selections of Trace Rifles are not supported at '
                                         'this time')
@@ -174,11 +183,9 @@ class Character:
                     WeaponSubType.get_string_representation(weapon_sub_type))
             raise NoAvailableWeaponsError(msg)
 
-        chosen_weapon = random.choice(weapons)
-        self.equip_weapon(chosen_weapon)
-        return chosen_weapon
+        return random.choice(weapons), len(weapons)
 
-    def equip_specific_weapon(self, weapon_name):
+    def select_specific_weapon(self, weapon_name):
         weapon_name_lowercase = weapon_name.lower()
 
         weapons = self.profile.get_all_weapons()
@@ -194,7 +201,5 @@ class Character:
             raise NoAvailableWeaponsError(
                 'Could not find any unequipped weapons matching "{}"'.format(weapon_name))
 
-        # Choose a random option from the matching weapons, and equip it
-        chosen_weapon = random.choice(matching)
-        self.equip_weapon(chosen_weapon)
-        return chosen_weapon
+        # In case there's multiple options, choose a random one
+        return random.choice(matching), len(matching)

@@ -10,5 +10,5 @@ class InvalidSelectionError(Error):
     pass
 
 
-class TransferError(Error):
+class TransferOrEquipError(Error):
     pass

@@ -50,7 +50,7 @@ class Application:
 
     def start_flask(self):
         """
-        Start the flask server, which will serve the OAUTH redirect endpoint to capture the oauth 
+        Start the flask server, which will serve the oauth redirect endpoint to capture the oauth
         code which will be used to make restricted api calls.
 
         This must run with ssl, because Bungie oauth does not allow redirect to http. Because adhoc
@@ -68,7 +68,7 @@ class Application:
 
     def open_oauth_page(self):
         """
-        Open the OAUTH authentication page in the default system web browser, and wait for the user
+        Open the oauth authentication page in the default system web browser, and wait for the user
         to authenticate and for the oauth code to be received by the flask server.
         """
         webbrowser.open(self.oauth_link)
