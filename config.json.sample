@@ -1,12 +1,12 @@
 {
 	"tmi_token": "oauth:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 	"client_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-	"bot_nickname": "destinyloadoutchanger",
+	"bot_nickname": "your bot channel name here",
 	"bot_prefix": "!",
 	"channel": "your channel name here",
 	"bungie_api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-	"bungie_display_name": "your bungie display name here",
 	"bungie_membership_type": 254,  # NOTE: This is 254 for players originally on Bungie. Not sure how this corresponds to users that switched to PC via cross-save
 	"oauth_client_id": 00000,
-	"oauth_client_secret": "xxxxx-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	"oauth_client_secret": "xxxxx-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+	"oauth_port": 4949
 }

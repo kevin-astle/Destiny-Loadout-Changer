@@ -13,8 +13,7 @@ from twitchio.ext import commands
 
 class Application:
 
-    def __init__(self, oauth_port=4949):
-        self.oauth_port = oauth_port
+    def __init__(self):
         self.flask_app = Flask(__name__)
         self.config = json.load(open('config.json'))
         self.bot = commands.Bot(
@@ -44,6 +43,10 @@ class Application:
     def oauth_link(self):
         return 'https://www.bungie.net/en/OAuth/Authorize?client_id={}&response_type=code'.format(
             self.config['oauth_client_id'])
+
+    @property
+    def oauth_port(self):
+        return self.config['oauth_port']
 
     @property
     def profile(self):

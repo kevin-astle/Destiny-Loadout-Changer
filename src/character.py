@@ -159,13 +159,21 @@ class Character:
         weapons = self.profile.get_all_weapons()
 
         if weapon_sub_type is not None:
-            weapons = [x for x in weapons if x.sub_type == weapon_sub_type]
+            for weapon in self.equipped_weapons:
+                # If any exotic weapons are equipped
+                if weapon.is_exotic:
+                    # Then exclude exotics from the pool of weapons to choose from
+                    weapons = [x for x in weapons if x.sub_type == weapon_sub_type]
 
+        # If weapon type not specified, and an exotic weapon is equipped, then exclude exotics
+        # from the pool of weapons to choose from
         if weapon_type is None:
-            # If weapon type not specified, then exclude exotics (to keep thing simple)
-            weapons = [x for x in weapons if not x.is_exotic]
+            for weapon in self.equipped_weapons:
+                if weapon.is_exotic:
+                    weapons = [x for x in weapons if x.sub_type == weapon_sub_type]
+                    break
         else:
-            # Else, restrict to the appropriate type
+            # Else if weapon type is specified, restrict to the appropriate type
             weapons = [x for x in weapons if x.type == weapon_type]
 
             for weapon in self.equipped_weapons:
@@ -173,6 +181,7 @@ class Character:
                 if weapon.type != weapon_type and weapon.is_exotic:
                     # Then exclude exotics from the pool of weapons to choose from
                     weapons = [x for x in weapons if not x.is_exotic]
+                    break
 
         if len(weapons) == 0:
             msg = 'No weapons available to equip'
