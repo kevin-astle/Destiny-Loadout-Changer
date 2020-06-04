@@ -4,7 +4,7 @@ import time
 
 import requests.exceptions
 
-from src.enums import WEAPON_BUCKET_HASHES, WeaponSubType
+from src.enums import WeaponSubType, WeaponType
 from src.exceptions import NoAvailableWeaponsError, InvalidSelectionError, TransferOrEquipError
 from src.item import Weapon
 
@@ -107,9 +107,9 @@ class Character:
 
         # This is to exclude postmaster weapons, which are in a separate bucket
         owned_unequipped_weapons = [x for x in all_unequipped_weapons
-                                    if x.data['bucketHash'] in WEAPON_BUCKET_HASHES]
+                                    if x.data['bucketHash'] in WeaponType.BUCKET_HASHES]
         postmaster_weapons = [x for x in all_unequipped_weapons
-                              if x.data['bucketHash'] not in WEAPON_BUCKET_HASHES]
+                              if x.data['bucketHash'] not in WeaponType.BUCKET_HASHES]
 
         return {'equipped': equipped_weapons,
                 'unequipped': owned_unequipped_weapons,
@@ -189,8 +189,8 @@ class Character:
 
     def select_random_weapon(self, weapon_type=None, weapon_sub_type=None):
         """
-        Select a random weapon, given certain optional constraints. For valid weapon type 
-        constraints, see WeaponType.get_enum_from_string. For valid weapon subtype constraints, see 
+        Select a random weapon, given certain optional constraints. For valid weapon type
+        constraints, see WeaponType.get_enum_from_string. For valid weapon subtype constraints, see
         WeaponSubType.get_enum_from_string
         """
         if weapon_sub_type == WeaponSubType.TRACE_RIFLE:
@@ -238,7 +238,7 @@ class Character:
     def select_specific_weapon(self, weapon_name):
         """
         Search for and select a weapon by name. If one or more exact matches is found, choose one of
-        those. If not, then look for partial matches and choose one of those. The matching is not 
+        those. If not, then look for partial matches and choose one of those. The matching is not
         case-sensitive
         """
         weapon_name_lowercase = weapon_name.lower()

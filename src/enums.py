@@ -1,20 +1,34 @@
 class WeaponType:
+    """
+    Enum representing different weapon types
+    """
     KINETIC = 'Kinetic'
     ENERGY = 'Energy'
     POWER = 'Power'
     UNKNOWN = 'Unknown'
 
+    # Used in a couple spots in the code, for determining if something is in a player's inventory
+    # or is in the postmaster
+    BUCKET_HASHES = [1498876634, 2465295065, 953998645]
+
     @staticmethod
     def get_type_from_bucket_hash(bucket_type_hash):
-        # Bucket type hashes correspond to hashes used in the Destiny 2 API
+        """
+        Convert from a bucket type hash to a weapon type. The bucket type hashes correspond to
+        hashes used in the Destiny 2 API
+        """
         return {
-            1498876634: WeaponType.KINETIC,
-            2465295065: WeaponType.ENERGY,
-            953998645: WeaponType.POWER
+            WeaponType.BUCKET_HASHES[0]: WeaponType.KINETIC,
+            WeaponType.BUCKET_HASHES[1]: WeaponType.ENERGY,
+            WeaponType.BUCKET_HASHES[2]: WeaponType.POWER
         }.get(bucket_type_hash, WeaponType.UNKNOWN)
 
     @staticmethod
     def get_enum_from_string(sub_type_string):
+        """
+        Convert a weapon type string to a weapon type enum value. Used for parsing viewer chat
+        input. Note that both power and heavy are valid, because viewers might use either term
+        """
         # Remove all nonletters, and convert to lowercase
         sub_type_string = ''.join(ch for ch in sub_type_string if ch.isalpha()).lower()
 
@@ -27,6 +41,9 @@ class WeaponType:
 
 
 class TierType:
+    """
+    Weapon tier type. Exotic is the only one used in the code at the moment
+    """
     BASIC = 2
     COMMON = 3
     RARE = 4
@@ -35,6 +52,10 @@ class TierType:
 
 
 class WeaponSubType:
+    """
+    Enum representing different weapon subtypes. These values correspond to values used in the
+    Destiny 2 API
+    """
     AUTO_RIFLE = 6
     SHOTGUN = 7
     MACHINE_GUN = 8
@@ -55,6 +76,9 @@ class WeaponSubType:
 
     @staticmethod
     def get_string_representation(sub_type):
+        """
+        Get a user-friendly string representation of the weapon subtype
+        """
         return {
             WeaponSubType.AUTO_RIFLE: 'Auto Rifle',
             WeaponSubType.SHOTGUN: 'Shotgun',
@@ -76,6 +100,10 @@ class WeaponSubType:
 
     @staticmethod
     def get_enum_from_string(sub_type_string):
+        """
+        Convert a weapon subtype string to a weapon subtype enum value. Used for parsing viewer chat
+        input. Some abbreviated forms are permitted
+        """
         # Remove all nonletters, and convert to lowercase
         sub_type_string = ''.join(ch for ch in sub_type_string if ch.isalpha()).lower()
 
@@ -104,6 +132,3 @@ class WeaponSubType:
             'tracerifle': WeaponSubType.TRACE_RIFLE,
             'bow': WeaponSubType.BOW
         }.get(sub_type_string, WeaponSubType.UNKNOWN)
-
-
-WEAPON_BUCKET_HASHES = [1498876634, 2465295065, 953998645]
