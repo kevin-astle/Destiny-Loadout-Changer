@@ -6,11 +6,12 @@ from src.application import Application
 application = Application()
 builtins.application = application
 
-# These must be imported after inserting application into the global namespace, because those
+# NOTE: These must be imported after inserting application into the global namespace, because those
 # modules reference the applicationo. This is a little unorthodox, but allows for splitting the code
-# up in a more logical way, which should make maintenance easier.
+# up in a more logical way, which should make maintenance easier
 #
-# Putting these in an if block prevents Eclipse from auto-moving them to an earlier location
+# Putting these in an if block prevents IDEs from auto-moving them to an earlier location as part of
+# code autoformatting
 if True:
     import src.bot
     import src.oauth_server
