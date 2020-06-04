@@ -195,39 +195,38 @@ class Character:
         """
         if weapon_sub_type == WeaponSubType.TRACE_RIFLE:
             raise InvalidSelectionError('Random selections of Trace Rifles are not supported at '
-                                        'this time')
+                                        'this time. However, you may use !equip to equip a '
+                                        'specific trace rifle')
 
         weapons = self.profile.get_all_weapons()
 
+        # Restrict by weapon subtype if specified
         if weapon_sub_type is not None:
-            for weapon in self.equipped_weapons:
-                # If any exotic weapons are equipped
-                if weapon.is_exotic:
-                    # Then exclude exotics from the pool of weapons to choose from
-                    weapons = [x for x in weapons if x.sub_type == weapon_sub_type]
+            weapons = [x for x in weapons if x.sub_type == weapon_sub_type]
 
         # If weapon type not specified, and an exotic weapon is equipped, then exclude exotics
         # from the pool of weapons to choose from
         if weapon_type is None:
             for weapon in self.equipped_weapons:
                 if weapon.is_exotic:
-                    weapons = [x for x in weapons if x.sub_type == weapon_sub_type]
+                    weapons = [x for x in weapons if not x.is_exotic]
                     break
         else:
             # Else if weapon type is specified, restrict to the appropriate type
             weapons = [x for x in weapons if x.type == weapon_type]
 
+            # Then check if exotic is equipped in one of the other slots. If so, exclude exotics
+            # from the pool of weapons to choose from
             for weapon in self.equipped_weapons:
-                # If a weapon in one of the other two slots is exotic
                 if weapon.type != weapon_type and weapon.is_exotic:
-                    # Then exclude exotics from the pool of weapons to choose from
                     weapons = [x for x in weapons if not x.is_exotic]
                     break
 
         if len(weapons) == 0:
             msg = 'No weapons available to equip'
             if weapon_type is not None:
-                msg += ' with weapon type {}'.format(weapon_type)
+                msg += ' with weapon type {}'.format(
+                    WeaponType.get_string_representation(weapon_type))
             if weapon_sub_type is not None:
                 msg += ' with weapon subtype {}'.format(
                     WeaponSubType.get_string_representation(weapon_sub_type))

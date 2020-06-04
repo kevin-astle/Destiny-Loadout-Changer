@@ -6,6 +6,7 @@ class WeaponType:
     KINETIC = 1498876634
     ENERGY = 2465295065
     POWER = 953998645
+    UNKNOWN = 0
 
     @staticmethod
     def values():

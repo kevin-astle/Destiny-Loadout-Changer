@@ -87,7 +87,7 @@ async def equip_random(ctx):
         # Tell the viewers what it understood from the comomand
         msg = 'Now equipping a random weapon'
         if weapon_type is not None:
-            msg += ' of type {}'.format(weapon_type)
+            msg += ' of type {}'.format(WeaponType.get_string_representation(weapon_type))
         if weapon_sub_type is not None:
             msg += ' of subtype {}'.format(WeaponSubType.get_string_representation(weapon_sub_type))
         await rate_limited_send(ctx, msg)

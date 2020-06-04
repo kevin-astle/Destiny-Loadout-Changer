@@ -57,8 +57,7 @@ class Weapon(Item):
         """
         Returns weapon type as a WeaponType enum value
         """
-        return WeaponType.get_type_from_bucket_hash(
-            self.manifest_data['inventory']['bucketTypeHash'])
+        return self.manifest_data['inventory']['bucketTypeHash']
 
     @property
     def is_exotic(self):
