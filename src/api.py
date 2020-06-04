@@ -1,8 +1,3 @@
-"""
-Class for performing Bungie API operations. Includes functions for getting/refreshing oauth access
-tokens, and for making GET/POST calls to arbitrary Bungie endpoints.
-"""
-
 import time
 
 import requests
@@ -15,8 +10,8 @@ BASE_URL = 'https://www.bungie.net/Platform'  # Base API url
 
 class API:
     """
-    Handles all the authentication details and provides methods for making api calls to arbitrary
-    Bungie endpoints
+    Class for performing Bungie API operations. Includes functions for getting/refreshing oauth 
+    access tokens, and for making GET/POST calls to arbitrary Bungie endpoints.
     """
 
     def __init__(self, api_key, client_id, client_secret, oauth_code, bungie_membership_type):
@@ -104,7 +99,7 @@ class API:
 
     def make_get_call(self, endpoint, params=None):
         """
-        Make an API GET call to the Bungie API. If an error occurs during the call, a 
+        Make an API GET call to the Bungie API. If an error occurs during the call, a
         requests.exceptions.HTTPError will be raised
 
         params:
