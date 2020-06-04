@@ -99,10 +99,10 @@ async def search_by_name(ctx):
     matches if necessary
     """
     requested_weapon = ctx.content[7:].strip()  # Drop first word (!search)
-    await named_weapon_action(ctx, requested_weapon, equip=True)
+    await named_weapon_action(ctx, requested_weapon, equip=False)
 
 
-def get_weapons_string(weapons, criteria, limit=50):
+def get_weapons_string(weapons, criteria):
     counted_weapons = {}
     for weapon in weapons:
         if weapon.name not in counted_weapons:
@@ -111,18 +111,23 @@ def get_weapons_string(weapons, criteria, limit=50):
             counted_weapons[weapon.name] += 1
 
     weapon_names = []
-    for weapon, count in counted_weapons.items():
+    for weapon_name, count in counted_weapons.items():
         if count > 1:
-            weapon_names.append('{} x{}'.format(weapon.name, count))
+            weapon_names.append('{} x{}'.format(weapon_name, count))
         else:
-            weapon_names.append(weapon.name)
+            weapon_names.append(weapon_name)
 
     weapon_names.sort()
 
-    weapons_string = criteria
-    if len(weapon_names) > limit:
-        weapons_string += ' (only displaying the first {}/{} matches)'
-    return weapons_string + ': ' + ', '.join(weapon_names[:limit])
+    weapons_str = criteria + \
+        ' ({} match{}): '.format(len(weapon_names), 'es' if len(weapon_names) > 1 else '') + \
+        ', '.join(weapon_names)
+
+    # Truncate if necessary
+    if len(weapons_str) > 500:
+        weapons_str = weapons_str[:497] + '...'
+
+    return weapons_str
 
 
 async def random_weapon_action(ctx, equip):
@@ -149,6 +154,8 @@ async def random_weapon_action(ctx, equip):
             msg = 'Now equipping a random weapon'
         else:
             msg = 'Searching for weapons'
+        if weapon_type is None and weapon_sub_type is None:
+            msg += ' of any type'
         if weapon_type is not None:
             msg += ' of type {}'.format(WeaponType.get_string_representation(weapon_type))
         if weapon_sub_type is not None:
@@ -238,5 +245,5 @@ async def named_weapon_action(ctx, requested_weapon, equip):
         await rate_limited_send(ctx, 'An error occurred: {}'.format(e))
     # If a totally unexpected error occurred, show detailed debug info
     except Exception as e:
-        await rate_limited_send(ctx, 'An unexpected error occurred. Debug information: '
-                                     '{}'.format(e))
+        await rate_limited_send(ctx, 'An unexpected error occurred. Detailed debug information: '
+                                     '{}'.format(traceback.format_exc()))

@@ -232,7 +232,7 @@ class Character:
                     WeaponSubType.get_string_representation(weapon_sub_type))
             raise NoAvailableWeaponsError(msg)
 
-        return random.choice(weapons), len(weapons)
+        return random.choice(weapons), weapons
 
     def select_weapon_by_name(self, weapon_name):
         """
@@ -256,4 +256,4 @@ class Character:
                 'Could not find any unequipped weapons matching "{}"'.format(weapon_name))
 
         # In case there's multiple options, choose a random one
-        return random.choice(matching), len(matching)
+        return random.choice(matching), matching
