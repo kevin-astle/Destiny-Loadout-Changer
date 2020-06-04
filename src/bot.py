@@ -12,6 +12,22 @@ if False:
 last_message_send_time = 0
 
 
+def is_name_command(command):
+    """
+    Checks if the command looks like a request to equip or search a weapon by name, or based on
+    criteria (type or subtype). If any words in the command can't be interpreted as either type or
+    subtype, it will be treated as a request to equip or search by name
+    """
+    words = command.split()[1:]  # Drop first word and separate into component words
+
+    # If any word looks like neither type nor subtype, return True
+    for word in words:
+        if WeaponType.get_enum_from_string(word) == WeaponType.UNKNOWN and \
+                WeaponSubType.get_enum_from_string(word) == WeaponSubType.UNKNOWN:
+            return True
+    return False
+
+
 async def rate_limited_send(context, message, rate_limit=1.5):
     """
     Send a message in the Twitch chat. There seems to be an issue with the twitchio library where
@@ -63,46 +79,44 @@ async def command_help(ctx):
                                  'sent to the player\'s inventory')
 
 
-@application.bot.command(name='random')
-async def equip_random(ctx):
-    """
-    Equip a random weapon, with optional constraints. For valid weapon type constraints, see
-    WeaponType.get_enum_from_string. For valid weapon subtype constraints, see
-    WeaponSubType.get_enum_from_string
-    """
-    await random_weapon_action(ctx, equip=True)
-
-
-@application.bot.command(name='search_random')
-async def search_random(ctx):
-    """
-    Search for all weapons matching the given criteria, and display them. Limits to the first 50
-    matches if necessary
-    """
-    await random_weapon_action(ctx, equip=False)
-
-
 @application.bot.command(name='equip')
-async def equip_by_name(ctx):
+async def equip(ctx):
     """
-    Equip a weapon by name. If one or more exact matches is found, choose one of those. If not, then
-    look for partial matches and choose one of those. The matching is not case-sensitive
+    Equip a weapon. If a name is specified, like "jade rabbit", weapons will be searched by name and
+    a matching weapon will be equipped. If more than one weapon matches, then one of the options
+    will be randomly chosen and equipped. If weapon type and/or subtype are specified instead of a
+    name, then a random weapon matching the given criteria will be randomly chosen and equipped. If
+    no parameters are given, then a random weapon of a random type will be chosen and equipped
     """
-    requested_weapon = ctx.content[6:].strip()  # Drop first word (!equip)
-    await named_weapon_action(ctx, requested_weapon, equip=True)
+    if is_name_command(ctx.content):
+        requested_weapon = ctx.content[6:].strip()  # Drop first word (!equip)
+        await named_weapon_action(ctx, requested_weapon, equip=True)
+    else:
+        await random_weapon_action(ctx, equip=True)
 
 
 @application.bot.command(name='search')
-async def search_by_name(ctx):
+async def search(ctx):
     """
-    Search for all weapons matching the given name, and display them. Limits to the first 50
-    matches if necessary
+    Search for a weapon. If a name is specified, like "jade rabbit", weapons will be searched by
+    name and any matching weapons will be displayed. If weapon type and/or subtype are specified
+    instead of a name, then all weapons matching the given criteria will be displayed. If no
+    parameters are given, then all weapons will be displayed. Note that exotics will be excluded in
+    certain cases, such as when no weapon type is specified
     """
-    requested_weapon = ctx.content[7:].strip()  # Drop first word (!search)
-    await named_weapon_action(ctx, requested_weapon, equip=False)
+    if is_name_command(ctx.content):
+        requested_weapon = ctx.content[7:].strip()  # Drop first word (!search)
+        await named_weapon_action(ctx, requested_weapon, equip=False)
+    else:
+        await random_weapon_action(ctx, equip=False)
 
 
 def get_weapons_string(weapons, criteria):
+    """
+    Generate a string showing all weapons which match the given criteria. If multiple weapons of the
+    same name are present in the list, then the quantity will be shown next to the name. If the
+    resulting string exceeds 500 characters in length, it will be truncated
+    """
     counted_weapons = {}
     for weapon in weapons:
         if weapon.name not in counted_weapons:
@@ -132,8 +146,10 @@ def get_weapons_string(weapons, criteria):
 
 async def random_weapon_action(ctx, equip):
     """
-    Select a random weapon, and either equip it (if equip is True) or display all weapons matching
-    the criteria (if equip is False)
+    Equip or search for a random weapon, with optional constraints. For valid weapon type
+    constraints, see WeaponType.get_enum_from_string. For valid weapon subtype constraints, see
+    WeaponSubType.get_enum_from_string. If equip is true, select from the available options and
+    equip the chosen weapon. Otherwise, display the matching options to the viewers
     """
     words = ctx.content.split()[1:]  # Drop first word (!random) and separate into component words
 
