@@ -234,7 +234,7 @@ class Character:
 
         return random.choice(weapons), len(weapons)
 
-    def select_specific_weapon(self, weapon_name):
+    def select_weapon_by_name(self, weapon_name):
         """
         Search for and select a weapon by name. If one or more exact matches is found, choose one of
         those. If not, then look for partial matches and choose one of those. The matching is not
