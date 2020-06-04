@@ -3,7 +3,8 @@ import time
 from src.enums import WeaponType, WeaponSubType
 from src.exceptions import Error
 
-if False:  # This is just to appease IDE code analyzers by defining application explicitly
+# This is just to appease IDE code analyzers by defining application explicitly in this module
+if False:
     application = None
 
 last_message_send_time = 0
@@ -25,7 +26,6 @@ async def rate_limited_send(context, message, rate_limit=1.5):
 
 @application.bot.event
 async def event_ready():
-    application.oauth_code = 'b47925f0a87ff59ab9d6abcf3af26f1f'
     if application.oauth_code is None:
         await application.bot._ws.send_privmsg(
             application.config['channel'],

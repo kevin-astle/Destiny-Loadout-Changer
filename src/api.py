@@ -22,8 +22,9 @@ class API:
         self.bungie_membership_type = bungie_membership_type
         self._membership_type = None
         self._access_token = None
+        self.refresh_token = None
         self._membership_id = None
-        self.expiration_date = None
+        self.expiration_time = None
 
         self.manifest = Manifest(self.api_key)
 
@@ -33,13 +34,10 @@ class API:
     def access_token(self):
         if self._access_token is None:
             self.get_token()
+        # If access token is expired, refresh it
+        if time.time() - self.expiration_time > 0:
+            self.refresh_access_token()
         return self._access_token
-
-    @property
-    def refresh_token(self):
-        if self._refresh_token is None:
-            self.get_refresh_token()
-        return self._refresh_token
 
     @property
     def membership_type(self):
@@ -57,14 +55,14 @@ class API:
         response = requests.post('https://www.bungie.net/Platform/App/OAuth/Token', data={
             'grant_type': 'authorization_code',
             'code': self.oauth_code,
-            'client_id': 32959,
+            'client_id': self.client_id,
             'client_secret': self.client_secret,
         }, headers={'X-API-Key': self.api_key})
         response.raise_for_status()
         output = response.json()
         self._access_token = output['access_token']
-        self._refresh_token = output['refresh_token']
-        self.expiration_date = time.time() + output['expires_in']
+        self.refresh_token = output['refresh_token']
+        self.expiration_time = time.time() + output['expires_in']
 
         # Get platform membership id
         output = self.make_get_call('/User/GetBungieAccount/{}/{}'.format(
@@ -72,17 +70,18 @@ class API:
         self._membership_id = output['Response']['destinyMemberships'][0]['membershipId']
         self._membership_type = output['Response']['destinyMemberships'][0]['membershipType']
 
-    def get_refresh_token(self):
+    def refresh_access_token(self):
         response = requests.post('https://www.bungie.net/Platform/App/OAuth/Token', data={
-            'grant_type': 'authorization_code',
+            'grant_type': 'refresh_token',
             'refresh_token': self.refresh_token,
+            'client_id': self.client_id,
+            'client_secret': self.client_secret
         }, headers={'X-API-Key': self.api_key})
         response.raise_for_status()
         output = response.json()
         self._access_token = output['access_token']
-        self._refresh_token = output['refresh_token']
-        self.expiration_date = time.time() + output['expires_in']
-        self._membership_id = output['membership_id']
+        self.refresh_token = output['refresh_token']
+        self.expiration_time = time.time() + output['expires_in']
 
     def make_get_call(self, endpoint, params=None):
         response = requests.get(BASE_URL + endpoint,
