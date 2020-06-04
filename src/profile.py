@@ -5,6 +5,9 @@ from src.item import Weapon
 
 
 class Profile:
+    """
+    Class representing a Profile. Allows for performing account-level API operations for a player
+    """
 
     def __init__(self, api):
         self.api = api
@@ -14,7 +17,9 @@ class Profile:
     @property
     def active_character(self):
         """
-        Assume that the most-recently-played character is currently online and active
+        Gets the currently-active character on the account. If all characters are offline, this will
+        be the character that was played most recently. This is lazily initialized, so it is only
+        evaluated once. If the player changes characters, then the bot will need to be restarted
         """
         if self._active_character is None:
             self._active_character = self.get_most_recent_character()
@@ -33,8 +38,8 @@ class Profile:
 
     def get_most_recent_character(self):
         """
-        Returns the character that was played most recently. If currently playing, then the active 
-        character will be returned
+        Returns the character that was played most recently. If currently playing, then that means
+        the active character will be returned
         """
         most_recent_character = None
         most_recent_playtime = None
@@ -71,7 +76,7 @@ class Profile:
 
     def get_all_weapons(self):
         """
-        Get all weapons, across all characters and the vault. Does not include postmaster weapons 
+        Get all weapons, across all characters and the vault. Does not include postmaster weapons
         or currently equipped weapons
         """
         all_weapons = self.get_vault_weapons()

@@ -14,6 +14,11 @@ import requests
 
 
 class Manifest:
+    """
+    Retrieve and store the Manifest data for Destiny 2, which holds static information like weapon
+    names, lore, etc.
+    """
+
     def __init__(self, api_key):
         self.api_key = api_key
         self._data = None
@@ -27,6 +32,12 @@ class Manifest:
 
     @property
     def data(self):
+        """
+        Lazily initialized. Gets the manifest data, either by loading saved manifest data or by
+        downloading the latest manifest db file and extracting the desired data. If manifest data
+        is loaded from a saved file, the version is compared against the current version to see if
+        it is out of date. If so, the latest manifest data will be downloaded
+        """
         if self._data is None:
             # Load saved manifest data, and check if it is out of date. If so, discard it
             if os.path.isfile('manifest.data'):
@@ -45,10 +56,17 @@ class Manifest:
 
     @property
     def item_data(self):
+        """
+        Returns the item section of the manifest data
+        """
         return self.data['DestinyInventoryItemDefinition']
 
     @property
     def manifest_info(self):
+        """
+        Gets the manifest metadata. This includes a link to the latest manifest db file, as well as
+        the current version. This is lazily initialized, so it is downloaded once per session
+        """
         if self._manifest_info is None:
             response = requests.get(
                 'http://www.bungie.net/Platform/Destiny2/Manifest',
@@ -59,13 +77,22 @@ class Manifest:
 
     @property
     def manifest_version(self):
+        """
+        Version of the latest manifest data
+        """
         return self.manifest_info['version']
 
     @property
     def manifest_db_url(self):
+        """
+        URL of the db file with the latest manifest data
+        """
         return 'http://www.bungie.net' + self.manifest_info['mobileWorldContentPaths']['en']
 
     def get_manifest(self):
+        """
+        Download the manifest data and extract the desired information from it
+        """
         # Download the sqlite db zip file, write it to 'manifest.zip'
         r = requests.get(self.manifest_db_url)
         with open("manifest.zip", "wb") as zip_file:

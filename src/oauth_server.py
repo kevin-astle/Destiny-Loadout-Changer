@@ -8,7 +8,7 @@ if False:
 @application.flask_app.route('/oauth', methods=['GET'])
 def oauth_redirect():
     """
-    Endpoint to accept oauth code from Bungie.
+    Endpoint to accept oauth code from Bungie
     """
     application.oauth_code = request.args['code']
     with open('auth.data', 'w') as f:
