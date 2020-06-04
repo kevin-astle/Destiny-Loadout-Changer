@@ -105,21 +105,16 @@ Valid values for the type:
 Search for and display all weapons matching the given criteria. The format is exactly the same as for the !equip command. If the output is larger than 500 characters, it will be truncated.
 
 #### Example usage
-``!search jade rabbit``
 
-Output:
+Output from ``!search jade rabbit``:
 
     Weapons with names matching "jade rabbit" (1 match): The Jade Rabbit
 
-``!search tool``
-
-Output:
+Output from ``!search tool``:
 
     Weapons with names matching "tool" (2 matches): CALUS Mini-Tool x9, MIDA Multi-Tool
 
-``!search kinetic``
-
-Output:
+Output from ``!search kinetic``:
 
     Weapons of type Kinetic (55 matches): Atalanta-D XG1992, Austringer, Baligant XU7743, Better Devils, Bite of the Fox, Blast Furnace, BrayTech Werewolf, Bygones x2, Cold Front x2, Dire Promise, Dust Rock Blues, Escape Velocity, Ether Doctor, Exit Strategy, Foregone Conclusion, Ghost Primus, Go Figure x2, Halfdan-D, Hawthorne's Field-Forged Shotgun x4, Horror Story, Imperative, Imperial Decree x2, Khvostov 7G-02, Lonesome, Long Shadow x2, MIDA Multi-Tool, Nameless Midnight x2, Night Watch, Nigh...
 
