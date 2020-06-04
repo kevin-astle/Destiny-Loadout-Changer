@@ -2,7 +2,6 @@ import builtins
 import time
 
 from src.application import Application
-from src.enums import WeaponType, WeaponSubType
 
 application = Application()
 builtins.application = application

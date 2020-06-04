@@ -51,7 +51,7 @@ async def equip_random(ctx):
             weapon_sub_type=weapon_sub_type)
         await ctx.send('Equipped {}'.format(weapon.name))
     except Error as e:
-        await ctx.send('An error occurred: {}'.format(e.msg))
+        await ctx.send('An error occurred: {}'.format(e))
     except Exception as e:
         await ctx.send('An unexpected error occurred. Debug information: {}'.format(e))
 
@@ -65,6 +65,6 @@ async def equip(ctx):
         weapon = application.profile.active_character.equip_specific_weapon(requested_weapon)
         await ctx.send('Equipped {}'.format(weapon.name))
     except Error as e:
-        await ctx.send('An error occurred: {}'.format(e.msg))
+        await ctx.send('An error occurred: {}'.format(e))
     except Exception as e:
         await ctx.send('An unexpected error occurred. Debug information: {}'.format(e))

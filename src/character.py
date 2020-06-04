@@ -67,8 +67,7 @@ class Character:
         items = self.api.make_get_call(
             '/Destiny2/{}/Profile/{}/Character/{}'.format(
                 self.membership_type, self.membership_id, self.character_id),
-            {'components': '201,205'},
-            rate_limit=3
+            {'components': '201,205'}
         )['Response']
         all_unequipped_weapons = [
             Weapon(x, self.api.manifest) for x in items['inventory']['data']['items']
@@ -133,17 +132,19 @@ class Character:
                 self.transfer_to_character(weapon)
 
             # Finally, equip the weapon
-            self.equip_owned_weapon(weapon)
+            response = self.equip_owned_weapon(weapon)
 
             self.profile.last_equip_time = time.time()
         except requests.exceptions.HTTPError as e:
-            if e.response.json()['ErrorCode'] == 1623:  # Item requested was not found
-                raise TransferError('An error occurred while attempting to transfer or equip items.'
-                                    'Please try again')
+            response_json = e.response.json()
+            if response_json['ErrorCode'] == 1623:  # Item requested was not found
+                raise TransferError('Unable to transfer or equip item. Please try again')
+            else:
+                raise TransferError(response_json['Message'])
 
     def equip_random_weapon(self, weapon_type=None, weapon_sub_type=None):
         if weapon_sub_type == WeaponSubType.TRACE_RIFLE:
-            raise InvalidSelectionError('Sorry, random selections of Trace Rifles are not supported at '
+            raise InvalidSelectionError('Random selections of Trace Rifles are not supported at '
                                         'this time')
 
         weapons = self.profile.get_all_weapons()

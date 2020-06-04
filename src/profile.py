@@ -62,8 +62,7 @@ class Profile:
         """
         items = self.api.make_get_call(
             '/Destiny2/{}/Profile/{}'.format(self.api.membership_type, self.api.membership_id),
-            {'components': '102'},
-            rate_limit=3
+            {'components': '102'}
         )['Response']['profileInventory']['data']['items']
         return [
             Weapon(x, self.api.manifest) for x in items
