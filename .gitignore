@@ -1,2 +1,7 @@
 .project
 .pydevproject
+config.json
+*.pyc
+*.data
+*.content
+manifest.zip
