@@ -57,7 +57,7 @@ When matching by slot/type, you may specify either the slot, the type, or neithe
 The bot inspects the command and tries to determine if it is a request to equip by name, or by weapon slot/type.
 
 Caveats when equipping by name:
-* There is no protection against equipping an exotic when there is already an exotic equipped in another slot. For example, if there is an exotic in the kinetic slot, and you type "!equip cold" to equip Cold Front (forgetting about the existence of Coldheart), and the bot chooses and tries to equip Coldheart, it will fail.
+* There is no protection against equipping an exotic when there is already an exotic equipped in another slot. For example, if there is an exotic in the kinetic slot, and you type ``!equip cold`` to equip Cold Front (forgetting about the existence of Coldheart), and the bot chooses and tries to equip Coldheart, it will fail.
 
 Caveats when equipping by slot/type:
 * If weapon slot is not specified, and an exotic weapon is equipped, then exotic weapons will be ignored when selecting.
