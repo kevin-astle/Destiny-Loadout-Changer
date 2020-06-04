@@ -4,11 +4,11 @@ import traceback
 from src.enums import WeaponType, WeaponSubType
 from src.exceptions import Error
 
-
 # This is just to appease IDE code analyzers by defining application explicitly in this module
 if False:
     application = None
 
+# Global variable to track how long ago a chat message was sent. Needed to rate-limit chat messages
 last_message_send_time = 0
 
 
@@ -119,7 +119,7 @@ async def equip_random(ctx):
 async def equip(ctx):
     """
     Equip a weapon by name. If one or more exact matches is found, choose one of those. If not, then
-    look for partial matches and choose one of those. The matching is not case-sensitive.
+    look for partial matches and choose one of those. The matching is not case-sensitive
     """
     requested_weapon = ctx.content[6:].strip()  # Drop first word (!equip)
 
