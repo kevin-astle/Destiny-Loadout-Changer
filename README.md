@@ -98,4 +98,9 @@ Valid values for the type:
 * tracerifle
 * bow
 
+## General Caveats
+* Weapons cannot be equipped mid-activity. They will, however, be moved to the player's inventory.
+* There's some weirdness in the Destiny API that seems to result in stale inventory data being returned on occasion. This causes errors where the bot tries to move a weapon to/from the vault that is no longer there. There is a retry mechanism in place which mostly fixes this, but sometimes equip operations will still fail.
+* This should go without saying, but if a weapon is not in a player's inventory or vault (e.g. they never had it or it's been dismantled), it cannot be equipped. There is no way to pull from Collections using the API. 
+
 If you find any bugs, please open a new issue.
