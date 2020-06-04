@@ -107,9 +107,9 @@ class Character:
 
         # This is to exclude postmaster weapons, which are in a separate bucket
         owned_unequipped_weapons = [x for x in all_unequipped_weapons
-                                    if x.data['bucketHash'] in WeaponType.BUCKET_HASHES]
+                                    if x.data['bucketHash'] in WeaponType.values()]
         postmaster_weapons = [x for x in all_unequipped_weapons
-                              if x.data['bucketHash'] not in WeaponType.BUCKET_HASHES]
+                              if x.data['bucketHash'] not in WeaponType.values()]
 
         return {'equipped': equipped_weapons,
                 'unequipped': owned_unequipped_weapons,

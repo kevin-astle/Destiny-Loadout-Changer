@@ -1,27 +1,26 @@
 class WeaponType:
     """
-    Enum representing different weapon types
+    Enum representing different weapon types. These values correspond to values used in the
+    Destiny 2 API
     """
-    KINETIC = 'Kinetic'
-    ENERGY = 'Energy'
-    POWER = 'Power'
-    UNKNOWN = 'Unknown'
-
-    # Used in a couple spots in the code, for determining if something is in a player's inventory
-    # or is in the postmaster
-    BUCKET_HASHES = [1498876634, 2465295065, 953998645]
+    KINETIC = 1498876634
+    ENERGY = 2465295065
+    POWER = 953998645
 
     @staticmethod
-    def get_type_from_bucket_hash(bucket_type_hash):
+    def values():
+        return [WeaponType.KINETIC, WeaponType.ENERGY, WeaponType.POWER]
+
+    @staticmethod
+    def get_string_representation(weapon_type):
         """
-        Convert from a bucket type hash to a weapon type. The bucket type hashes correspond to
-        hashes used in the Destiny 2 API
+        Get a user-friendly string representation of the weapon type
         """
         return {
-            WeaponType.BUCKET_HASHES[0]: WeaponType.KINETIC,
-            WeaponType.BUCKET_HASHES[1]: WeaponType.ENERGY,
-            WeaponType.BUCKET_HASHES[2]: WeaponType.POWER
-        }.get(bucket_type_hash, WeaponType.UNKNOWN)
+            WeaponType.KINETIC: "Kinetic",
+            WeaponType.ENERGY: 'Energy',
+            WeaponType.POWER: 'Power'
+        }.get(weapon_type, 'Unknown')
 
     @staticmethod
     def get_enum_from_string(sub_type_string):
